@@ -111,8 +111,8 @@ def concat_all_by_sep_train_2(example):
   return {'label': output, 'text': prompt}
 
 #tokenizer = RobertaTokenizer.from_pretrained("roberta-base")
-tokenizer = RobertaTokenizer.from_pretrained("roberta-large")
-#tokenizer = AutoTokenizer.from_pretrained("facebook/bart-large")
+#tokenizer = RobertaTokenizer.from_pretrained("roberta-large")
+tokenizer = AutoTokenizer.from_pretrained("facebook/bart-large")
 #tokenizer = AutoTokenizer.from_pretrained("facebook/bart-large-cnn")
 #tokenizer = AutoTokenizer.from_pretrained("facebook/bart-base")
 
@@ -161,8 +161,8 @@ def getTrainingArguments(size, lr_2):
 
   t_args = TrainingArguments(
     output_dir='./results',          # output directory
-    per_device_train_batch_size=4,  # batch size per device during training
-    per_device_eval_batch_size=4,   # batch size for evaluation
+    per_device_train_batch_size=16,  # batch size per device during training
+    per_device_eval_batch_size=16,   # batch size for evaluation
     weight_decay=0.01,               # strength of weight decay
     logging_dir='./logs',            # directory for storing logs
     load_best_model_at_end=True,     # load the best model when finished training (default metric is loss)
@@ -431,8 +431,8 @@ for train_size in size_list:
     tokenized_datasets = dataset.map(tokenize_function, batched=True)
 
     #checkpoint = "roberta-base"
-    checkpoint = "roberta-large"
-    #checkpoint = "facebook/bart-large"
+    #checkpoint = "roberta-large"
+    checkpoint = "facebook/bart-large"
     #checkpoint = "facebook/bart-base"
     model = AutoModelForSequenceClassification.from_pretrained(checkpoint, num_labels=2)
 
@@ -474,47 +474,6 @@ for train_size in size_list:
       with open('output.txt', 'a') as file:
         print('lr: ', each_lr, file = file)
         print(classification_report(actual, preds), file = file)
-    '''
-    training_args = TrainingArguments(output_dir="test_trainer", evaluation_strategy="epoch", num_train_epochs=8,
-                                      per_gpu_train_batch_size=16,
-                                      seed = 123,
-                                      learning_rate=lr)
-
-    tr_args = getTrainingArguments(len(small_train_dataset))
-
-    early_stop = EarlyStoppingCallback(3, 0.01)
-
-    trainer = Trainer(
-      model=model,
-      args=tr_args,
-      train_dataset=tokenized_datasets["train"],
-      #train_dataset=small_train_dataset,
-      eval_dataset=tokenized_datasets["validation"],
-      #eval_dataset=small_eval_dataset,
-      compute_metrics=custom_metrics_all,
-      callbacks=[early_stop])
-
-    trainer.train()
-    trainer.evaluate()
-
-    t = tokenized_datasets["test"].remove_columns("text")
-    results = trainer.predict(t)
-    results
-
-    preds = []
-
-    for x in results[0]:
-      y = np.argmax(x)
-      preds.append(y)
-    set(preds)
-    actual = results[1].tolist()
-
-    with open('output.txt', 'a') as file:
-      print(classification_report(actual, preds), file = file)
-    '''
-    #os.system("git add .")
-    #os.system("git commit -m message")
-    #os.system("git push")
 
 os.system("git add .")
 os.system("git commit -m message")
