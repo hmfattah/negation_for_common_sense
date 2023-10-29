@@ -1,4 +1,5 @@
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+import torch
 
 # Define the checkpoint and tokenizer
 checkpoint = "facebook/bart-large"
