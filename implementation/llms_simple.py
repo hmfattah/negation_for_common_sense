@@ -60,8 +60,6 @@ if '__index_level_0__' in test_dataset_all.column_names:
     new_test_dataset_2 = test_dataset_all.remove_columns(['__index_level_0__'])
 new_test_dataset_2
 new_test_dataset_2 = new_test_dataset_2.remove_columns(['p', 'q', 'r', 'output'])
-print(new_test_dataset_2[0])
-print(new_test_dataset_2[1])
 
 dts = new_train_dataset.train_test_split(test_size=0.10)
   
@@ -82,6 +80,7 @@ test_data = dataset['test']
 
 # Load the BART-Large model and tokenizer
 checkpoint = "facebook/bart-large"
+checkpoint = "roberta-base"
 tokenizer = AutoTokenizer.from_pretrained(checkpoint)
 
 # Define the number of labels (in this case, 2 for binary classification)
@@ -112,7 +111,8 @@ training_args = TrainingArguments(
     logging_dir="./logs",
     #evaluation_steps=500,  # Evaluate every 500 steps
     #save_steps=500,  # Save every 500 steps
-    save_strategy="steps",
+    #save_strategy="steps",
+    
     remove_unused_columns=False,
     push_to_hub=False,
     load_best_model_at_end=True,
