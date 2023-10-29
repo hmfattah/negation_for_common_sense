@@ -45,16 +45,10 @@ if '__index_level_0__' in td.column_names:
 
 # Filter out rows where 'q' column has value 'nan'
 filtered_dataset = td.filter(lambda example: example['q'] != 'nan')
-# Filter out rows where 'q' attribute has value 'None'
 filtered_dataset = filtered_dataset.filter(lambda example: example['q'] is not None)
-
 train_dataset = filtered_dataset.map(concat_all_by_sep_train)
 
-print(train_dataset[0])
-print(train_dataset[1])
-
 new_train_dataset = train_dataset.remove_columns(['p', 'q', 'r', 'output'])
-new_train_dataset
 new_train_dataset = new_train_dataset.shuffle(seed=42)
 
 test_dataset_all = Dataset.from_pandas(test_data_all)
@@ -65,8 +59,11 @@ new_test_dataset_2 = test_dataset_all
 if '__index_level_0__' in test_dataset_all.column_names:
     new_test_dataset_2 = test_dataset_all.remove_columns(['__index_level_0__'])
 new_test_dataset_2
+new_test_dataset_2 = new_test_dataset_2.remove_columns(['p', 'q', 'r', 'output'])
+print(new_test_dataset_2[0])
+print(new_test_dataset_2[1])
 
-dts = Dataset.from_pandas(new_train_dataset.to_pandas()).train_test_split(test_size=0.10)
+dts = new_train_dataset.train_test_split(test_size=0.10)
   
 dataset = DatasetDict()
 dataset['train'] = Dataset.from_pandas(dts["train"].to_pandas())
@@ -79,11 +76,9 @@ print(dataset)
 # Assuming you have datasets with 'text' and 'label' columns where 'label' is 0 or 1
 # You'll need to load your data into these datasets or dataframes
 
-
-'''
-training_data = ...
-evaluation_data = ...
-test_data = ...
+training_data = dataset['train']
+evaluation_data = dataset['validation']
+test_data = dataset['test']
 
 # Load the BART-Large model and tokenizer
 checkpoint = "facebook/bart-large"
@@ -136,4 +131,3 @@ tokenized_test_data = test_data.map(tokenize_function, batched=True)
 results = trainer.evaluate(eval_dataset=tokenized_test_data)
 
 print("Results:", results)
-'''
