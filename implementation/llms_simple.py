@@ -103,12 +103,15 @@ training_args = TrainingArguments(
     num_train_epochs=3,  # Adjust the number of training epochs
     evaluation_strategy="steps",
     save_total_limit=2,
+    
     learning_rate=1e-4,  # Adjust the learning rate
+    
     per_device_train_batch_size=8,  # Adjust batch size
     per_device_eval_batch_size=8,  # Adjust batch size
+    
     logging_dir="./logs",
-    evaluation_steps=500,  # Evaluate every 500 steps
-    save_steps=500,  # Save every 500 steps
+    #evaluation_steps=500,  # Evaluate every 500 steps
+    #save_steps=500,  # Save every 500 steps
     save_strategy="steps",
     remove_unused_columns=False,
     push_to_hub=False,
