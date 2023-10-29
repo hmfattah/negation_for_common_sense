@@ -34,7 +34,7 @@ from transformers import AutoTokenizer
 #os.environ['NCCL_DEBUG'] = 'INFO'
 
 import torch
-torch.cuda.empty_cache()
+#torch.cuda.empty_cache()
 
 root="../data"
 link2 = root+'/2_test_data.csv'
@@ -110,11 +110,12 @@ def concat_all_by_sep_train_2(example):
 
   return {'label': output, 'text': prompt}
 
-#tokenizer = RobertaTokenizer.from_pretrained("roberta-base")
-#tokenizer = RobertaTokenizer.from_pretrained("roberta-large")
-tokenizer = AutoTokenizer.from_pretrained("facebook/bart-large")
-#tokenizer = AutoTokenizer.from_pretrained("facebook/bart-large-cnn")
-#tokenizer = AutoTokenizer.from_pretrained("facebook/bart-base")
+#checkpoint = "roberta-base"
+checkpoint = "roberta-large"
+#checkpoint = "facebook/bart-large"
+#checkpoint = "facebook/bart-base"
+
+tokenizer = AutoTokenizer.from_pretrained(checkpoint)
 
 def tokenize_function(examples):
   return tokenizer(examples["text"], padding="max_length", truncation=True)
@@ -350,6 +351,7 @@ for train_size in size_list:
       with open('output.txt', 'a') as file:
         print("Dataset: ANION_Semi_Logical_Neg(+) + ANION_Semi_Logical_Neg(-), Size: ", train_size, file = file)
     elif i == 11:
+      continue
       # process ANION_Logical_Neg(+) + ANION_Logical_Neg(-) + ANION_Semi_Logical_Neg(+) + ANION_Semi_Logical_Neg(-)
       anion_logical_neg_data_label_1 = anion_logical_neg_data_label_1.sample(frac=1, random_state=42)  # Shuffle + Set a random_state for reproducibility
       anion_logical_neg_data_label_1 = anion_logical_neg_data_label_1.head(train_size) # For now, train with only 5000
@@ -369,6 +371,7 @@ for train_size in size_list:
       with open('output.txt', 'a') as file:
         print("Dataset: ANION_Logical_Neg(+) + ANION_Logical_Neg(-) + ANION_Semi_Logical_Neg(+) + ANION_Semi_Logical_Neg(-), Size: ", train_size, file = file)
     elif i == 12:
+      continue
       # process ATOMIC (+) + ATOMIC (-) + ANION_Logical_Neg(+) + ANION_Logical_Neg(-) + ANION_Semi_Logical_Neg(+) + ANION_Semi_Logical_Neg(-)
       atomic_data = atomic_data.sample(frac=1, random_state=42)  # Shuffle + Set a random_state for reproducibility
       atomic_data = atomic_data.head(train_size) 
@@ -430,14 +433,11 @@ for train_size in size_list:
 
     tokenized_datasets = dataset.map(tokenize_function, batched=True)
 
-    #checkpoint = "roberta-base"
-    #checkpoint = "roberta-large"
-    checkpoint = "facebook/bart-large"
-    #checkpoint = "facebook/bart-base"
     model = AutoModelForSequenceClassification.from_pretrained(checkpoint, num_labels=2)
 
-    small_train_dataset = tokenized_datasets["train"].shuffle(seed=42)
-    small_eval_dataset = tokenized_datasets["validation"].shuffle(seed=42)
+    small_train_dataset = tokenized_datasets["train"].shuffle(seed=42).select(range(1000))
+    small_eval_dataset = tokenized_datasets["validation"].shuffle(seed=42).select(range(100))
+    print('small train size: ', len(small_train_dataset))
 
     lr = 2e-5
     lr_list = [1e-6, 5e-6, 1e-5, 5e-5, 1e-4]
@@ -449,10 +449,10 @@ for train_size in size_list:
       trainer = Trainer(
         model=model,
         args=tr_args,
-        train_dataset=tokenized_datasets["train"],
-        #train_dataset=small_train_dataset,
-        eval_dataset=tokenized_datasets["validation"],
-        #eval_dataset=small_eval_dataset,
+        #train_dataset=tokenized_datasets["train"],
+        train_dataset=small_train_dataset,
+        #eval_dataset=tokenized_datasets["validation"],
+        eval_dataset=small_eval_dataset,
         compute_metrics=custom_metrics_all,
         callbacks=[early_stop])
 
