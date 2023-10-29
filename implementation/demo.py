@@ -10,7 +10,7 @@ model = AutoModelForSeq2SeqLM.from_pretrained(checkpoint)
 max_length = 128
 
 # Define a function to generate text
-def generate_text(input_text):
+def generate_text(input_text, max_new_tokens=50):
     input_ids = tokenizer.encode(input_text, return_tensors="pt", add_special_tokens=True)
     with torch.no_grad():
         output = model.generate(input_ids, max_length=len(input_ids[0]) + max_new_tokens, num_return_sequences=1)
@@ -20,5 +20,5 @@ def generate_text(input_text):
 
 # Example usage
 input_text = "Translate this English text to French: 'Hello, how are you?'"
-output_text = generate_text(input_text)
+output_text = generate_text(input_text, max_new_tokens=50)
 print(output_text)
