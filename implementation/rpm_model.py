@@ -408,14 +408,14 @@ for train_size in size_list:
     filtered_dataset = filtered_dataset.filter(lambda example: example['q'] is not None)
 
     train_dataset = Dataset.from_pandas(filtered_dataset.to_pandas())
-    train_dataset = train_dataset.map(concat_all_by_sep_train_2)
+    train_dataset = train_dataset.map(concat_all_by_sep_train)
 
     new_train_dataset = train_dataset.remove_columns(['p', 'q', 'r', 'output'])
     new_train_dataset
     new_train_dataset = new_train_dataset.shuffle(seed=42)
 
     test_dataset_all = Dataset.from_pandas(test_data_all)
-    test_dataset_all = test_dataset_all.map(concat_all_by_sep_train_2)
+    test_dataset_all = test_dataset_all.map(concat_all_by_sep_train)
     test_dataset_all
 
     new_test_dataset_2 = test_dataset_all
