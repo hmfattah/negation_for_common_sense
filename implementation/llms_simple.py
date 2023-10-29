@@ -33,9 +33,7 @@ atomic_data = pd.read_csv(link4)
 #concat all and make a new string
 def concat_all_by_sep_train(example):
   output = int(example['output'])
-
   final_str = example['p'] + " </s> " + example['r'] + " </s> " + example['q']
-
   return {'label': output, 'text': final_str}
 
 atomic_data = atomic_data.sample(frac=1, random_state=42)  # Shuffle + Set a random_state for reproducibility
@@ -44,21 +42,16 @@ train_data = atomic_data.head(1000)
 td = Dataset.from_pandas(train_data)
 if '__index_level_0__' in td.column_names:
     td = td.remove_columns(['__index_level_0__'])
-print('td: ', td)
 
 # Filter out rows where 'q' column has value 'nan'
 filtered_dataset = td.filter(lambda example: example['q'] != 'nan')
 # Filter out rows where 'q' attribute has value 'None'
 filtered_dataset = filtered_dataset.filter(lambda example: example['q'] is not None)
 
-print(filtered_dataset)
+train_dataset = filtered_dataset.map(concat_all_by_sep_train)
 
-train_dataset = Dataset.from_pandas(filtered_dataset.to_pandas())
-train_dataset = train_dataset.map(concat_all_by_sep_train)
-
-print(train_dataset)
-
-print('fix')
+print(train_dataset[0])
+print(train_dataset[1])
 
 new_train_dataset = train_dataset.remove_columns(['p', 'q', 'r', 'output'])
 new_train_dataset
