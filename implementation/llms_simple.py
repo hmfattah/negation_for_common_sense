@@ -38,6 +38,9 @@ def concat_all_by_sep_train(example):
 
   return {'label': output, 'text': final_str}
 
+atomic_data = atomic_data.sample(frac=1, random_state=42)  # Shuffle + Set a random_state for reproducibility
+train_data = atomic_data.head(1000) 
+
 td = Dataset.from_pandas(train_data)
 if '__index_level_0__' in td.column_names:
     td = td.remove_columns(['__index_level_0__'])
