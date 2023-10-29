@@ -111,8 +111,8 @@ def concat_all_by_sep_train_2(example):
   return {'label': output, 'text': prompt}
 
 #checkpoint = "roberta-base"
-checkpoint = "roberta-large"
-#checkpoint = "facebook/bart-large"
+#checkpoint = "roberta-large"
+checkpoint = "facebook/bart-large"
 #checkpoint = "facebook/bart-base"
 
 tokenizer = AutoTokenizer.from_pretrained(checkpoint)
