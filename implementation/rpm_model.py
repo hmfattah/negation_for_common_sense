@@ -116,6 +116,7 @@ checkpoint = "facebook/bart-large"
 #checkpoint = "facebook/bart-base"
 
 tokenizer = AutoTokenizer.from_pretrained(checkpoint)
+model = AutoModelForSequenceClassification.from_pretrained(checkpoint, num_labels=2)
 
 def tokenize_function(examples):
   return tokenizer(examples["text"], padding="max_length", truncation=True)
@@ -433,8 +434,6 @@ for train_size in size_list:
 
     tokenized_datasets = dataset.map(tokenize_function, batched=True)
 
-    model = AutoModelForSequenceClassification.from_pretrained(checkpoint, num_labels=2)
-
     small_train_dataset = tokenized_datasets["train"].shuffle(seed=42).select(range(1000))
     small_eval_dataset = tokenized_datasets["validation"].shuffle(seed=42).select(range(100))
     print('small train size: ', len(small_train_dataset))
@@ -457,6 +456,9 @@ for train_size in size_list:
         callbacks=[early_stop])
 
       trainer.train()
+
+      print('test check')
+
       trainer.evaluate()
 
       t = tokenized_datasets["test"].remove_columns("text")
