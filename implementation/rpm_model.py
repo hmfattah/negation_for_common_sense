@@ -114,7 +114,7 @@ def tokenize_function(examples):
 
 def compute_metrics(eval_pred):
   metric = load_metric("accuracy")
-  
+
   logits, labels = eval_pred
   predictions = np.argmax(logits, axis=-1)
   return metric.compute(predictions=predictions, references=labels)
@@ -354,9 +354,9 @@ for train_size in size_list:
     tokenized_datasets = dataset.map(tokenize_function, batched=True)
 
     small_train_dataset = tokenized_datasets["train"].shuffle(seed=42)
-    #small_train_dataset = tokenized_datasets["train"].shuffle(seed=42).select(range(100))
+    small_train_dataset = tokenized_datasets["train"].shuffle(seed=42).select(range(500))
     small_eval_dataset = tokenized_datasets["validation"].shuffle(seed=42)
-    #small_eval_dataset = tokenized_datasets["validation"].shuffle(seed=42).select(range(100))
+    small_eval_dataset = tokenized_datasets["validation"].shuffle(seed=42).select(range(100))
     print('small train size: ', len(small_train_dataset))
 
     lr = 2e-5
