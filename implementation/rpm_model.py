@@ -129,7 +129,7 @@ def custom_metrics_all(eval_pred):
     print('logits: ', logits)
     print('shape of logits: ', logits.shape)
 
-    predictions = np.argmax(logits, axis=-1)
+    predictions = np.argmax(logits, axis=1)
 
     print('predictions: ', predictions)
 
