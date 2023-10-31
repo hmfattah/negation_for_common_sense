@@ -125,25 +125,13 @@ def custom_metrics_all(eval_pred):
     logits, labels = eval_pred
     predictions = np.argmax(logits, axis=-1)
 
+    print('labels: ', labels)
+    print('predictions: ', predictions)
+
     precision = precision_score(labels, predictions, average='weighted')
     recall = recall_score(labels, predictions, average='weighted')
     f1 = f1_score(labels, predictions, average='weighted')
     accuracy = accuracy_score(labels, predictions)
-
-    return {"precision": precision, "recall": recall, "f1": f1, "accuracy": accuracy}
-
-
-def custom_metrics_all_3(precision_metric, recall_metric, f1_metric, accuracy_metric, eval_pred):
-    logits, labels = eval_pred
-    predictions = np.argmax(logits, axis=-1)
-
-    # Compute precision, recall, and F1 with "weighted" averaging
-    precision = precision_metric.compute(predictions=predictions, references=labels, average="weighted")["precision"]
-    recall = recall_metric.compute(predictions=predictions, references=labels, average="weighted")["recall"]
-    f1 = f1_metric.compute(predictions=predictions, references=labels, average="weighted")["f1"]
-
-    # Compute accuracy with "macro" averaging
-    accuracy = accuracy_metric.compute(predictions=predictions, references=labels, average="macro")["accuracy"]
 
     return {"precision": precision, "recall": recall, "f1": f1, "accuracy": accuracy}
 
@@ -373,9 +361,9 @@ for train_size in size_list:
     test_dataset_all = test_dataset_all.remove_columns(['p', 'q', 'r', 'output'])
 
     dataset = DatasetDict()
-    dataset['train'] = Dataset.from_pandas(dts["train"].to_pandas())
-    dataset['validation'] = Dataset.from_pandas(dts["test"].to_pandas())
-    dataset['test'] =  Dataset.from_pandas(test_dataset_all.to_pandas())
+    dataset['train'] = dts["train"]
+    dataset['validation'] = dts["test"]
+    dataset['test'] =  test_dataset_all
 
     print(dataset)
 
@@ -398,15 +386,9 @@ for train_size in size_list:
     num_columns = len(small_eval_dataset.features)
     print("Shape of dataset['eval']: Rows =", num_rows, ", Columns =", num_columns)
 
-    # Define custom metrics
-    precision_metric = load_metric("precision")
-    recall_metric = load_metric("recall")
-    f1_metric = load_metric("f1")
-    accuracy_metric = load_metric("accuracy")
-
     lr = 2e-5
-    lr_list = [1e-6, 5e-6, 1e-5, 5e-5, 1e-4]
-    lr_list = [1e-6]
+    #lr_list = [1e-6, 5e-6, 1e-5, 5e-5, 1e-4]
+    lr_list = [1e-6, 5e-5]
     for each_lr in lr_list:
       tr_args = getTrainingArguments(len(small_train_dataset), each_lr)
 
@@ -420,21 +402,12 @@ for train_size in size_list:
         #eval_dataset=tokenized_datasets["validation"],
         eval_dataset=small_eval_dataset,
         compute_metrics=compute_metrics,
-        #compute_metrics=lambda p: custom_metrics_all(precision_metric, recall_metric, f1_metric, accuracy_metric, p),
         callbacks=[early_stop])
 
       trainer.train()
-
-      print('hi')
-
       trainer.evaluate()
 
       t = tokenized_datasets["test"].remove_columns("text")
-
-      predictions = trainer.predict(dataset['test'])
-      predicted_labels = predictions.predictions.argmax(axis=1)
-      print('predicted_labels: ', predicted_labels)
-      true_labels = dataset['test']["label"]
 
       results = trainer.predict(t)
 
