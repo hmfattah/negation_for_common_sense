@@ -127,7 +127,7 @@ def custom_metrics_all(eval_pred):
     print('labels: ', labels)
     print('shape of labels: ', labels.shape)
     print('logits: ', logits)
-    print('shape of logits: ', logits.shape)
+    #print('shape of logits: ', logits.shape)
 
     #predictions = np.argmax(logits, axis=-1)
     predictions = torch.argmax(logits, dim=-1)
