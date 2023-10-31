@@ -26,7 +26,7 @@ from sklearn.dummy import DummyClassifier
 from transformers import AutoTokenizer
 
 import torch
-#torch.cuda.empty_cache()
+torch.cuda.empty_cache()
 
 root="../data"
 link2 = root+'/2_test_data.csv'
