@@ -123,9 +123,14 @@ from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_sc
 
 def custom_metrics_all(eval_pred):
     logits, labels = eval_pred
-    predictions = np.argmax(logits, axis=-1)
 
     print('labels: ', labels)
+    print('shape of labels: ', labels.shape)
+    print('logits: ', logits)
+    print('shape of logits: ', logits.shape)
+
+    predictions = np.argmax(logits, axis=-1)
+
     print('predictions: ', predictions)
 
     precision = precision_score(labels, predictions, average='weighted')
