@@ -358,14 +358,15 @@ for train_size in size_list:
     tokenized_datasets = dataset.map(tokenize_function, batched=True)
 
     small_train_dataset = tokenized_datasets["train"].shuffle(seed=42)
-    small_train_dataset = small_train_dataset.select(range(1000))
+    #small_train_dataset = small_train_dataset.select(range(1000))
     small_eval_dataset = tokenized_datasets["validation"].shuffle(seed=42)
-    small_eval_dataset = small_eval_dataset.select(range(10))
-
+    #small_eval_dataset = small_eval_dataset.select(range(10))
+    '''
     small_train_dataset.set_format(type="torch", columns=["input_ids", "attention_mask", "labels"])
     small_train_dataset = small_train_dataset.cast(torch.float16)
     small_eval_dataset.set_format(type="torch", columns=["input_ids", "attention_mask", "labels"])
     small_eval_dataset = small_eval_dataset.cast(torch.float16)
+    '''
     
     print('small train size: ', len(small_train_dataset))
 
