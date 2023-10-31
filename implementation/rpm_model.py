@@ -373,19 +373,30 @@ for train_size in size_list:
     test_dataset_all = test_dataset_all.remove_columns(['p', 'q', 'r', 'output'])
 
     dataset = DatasetDict()
-    dataset['train'] = dts["train"]
-    dataset['validation'] = dts["test"]
-    dataset['test'] =  test_dataset_all
+    dataset['train'] = Dataset.from_pandas(dts["train"].to_pandas())
+    dataset['validation'] = Dataset.from_pandas(dts["test"].to_pandas())
+    dataset['test'] =  Dataset.from_pandas(test_dataset_all.to_pandas())
 
     print(dataset)
 
     tokenized_datasets = dataset.map(tokenize_function, batched=True)
 
     small_train_dataset = tokenized_datasets["train"].shuffle(seed=42)
-    small_train_dataset = tokenized_datasets["train"].shuffle(seed=42).select(range(1000))
+    small_train_dataset = small_train_dataset.select(range(1000))
     small_eval_dataset = tokenized_datasets["validation"].shuffle(seed=42)
-    small_eval_dataset = tokenized_datasets["validation"].shuffle(seed=42).select(range(100))
+    small_eval_dataset = small_eval_dataset.select(range(1000))
+    
     print('small train size: ', len(small_train_dataset))
+    print(type(small_train_dataset))
+    print(type(small_eval_dataset))
+
+    num_rows = small_train_dataset.num_rows
+    num_columns = len(small_train_dataset.features)
+    print("Shape of dataset['train']: Rows =", num_rows, ", Columns =", num_columns)
+
+    num_rows = small_eval_dataset.num_rows
+    num_columns = len(small_eval_dataset.features)
+    print("Shape of dataset['eval']: Rows =", num_rows, ", Columns =", num_columns)
 
     # Define custom metrics
     precision_metric = load_metric("precision")
