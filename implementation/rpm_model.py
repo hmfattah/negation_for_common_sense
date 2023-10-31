@@ -120,24 +120,23 @@ def compute_metrics(eval_pred):
   return metric.compute(predictions=predictions, references=labels)
 
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
+from transformers import EvalPrediction
 
-def custom_metrics_all(eval_pred):
-    print('eval pred: ', eval_pred)
-    print('type: ', type(eval_pred))
-    print('shape: ', eval_pred.shape)
+def custom_metrics_all(eval_prediction: EvalPrediction, data_loader):
+    #logits, labels = eval_pred
 
-    logits, labels = eval_pred
+    predictions = eval_prediction.predictions
+    labels = eval_prediction.label_ids
 
-    print('labels: ', labels)
-    print('shape of labels: ', labels.shape)
-    #print('logits: ', logits)
-    #print('shape of logits: ', logits.shape)
-
+    #print('labels: ', labels)
+    #print('shape of labels: ', labels.shape)
+    
     #predictions = np.argmax(logits, axis=-1)
-    matrix = torch.tensor(logits)
-    predictions = torch.argmax(matrix, dim=-1)
+    
+    #matrix = torch.tensor(logits)
+    #predictions = torch.argmax(matrix, dim=-1)
 
-    print('predictions: ', predictions)
+    #print('predictions: ', predictions)
 
     precision = precision_score(labels, predictions, average='weighted')
     recall = recall_score(labels, predictions, average='weighted')
