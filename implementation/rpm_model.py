@@ -334,8 +334,8 @@ for train_size in size_list:
     filtered_dataset = td.filter(lambda example: example['q'] != 'nan')
     filtered_dataset = filtered_dataset.filter(lambda example: example['q'] is not None)
     
-    train_dataset = Dataset.from_pandas(filtered_dataset.to_pandas())
-    train_dataset = train_dataset.map(concat_all_by_sep_train)
+    #train_dataset = Dataset.from_pandas(filtered_dataset.to_pandas())
+    train_dataset = filtered_dataset.map(concat_all_by_sep_train)
     new_train_dataset = train_dataset.remove_columns(['p', 'q', 'r', 'output'])
     new_train_dataset = new_train_dataset.shuffle(seed=42)
     dts = Dataset.from_pandas(new_train_dataset.to_pandas()).train_test_split(test_size=0.10)
