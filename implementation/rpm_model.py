@@ -100,13 +100,13 @@ def concat_all_by_sep_train_2(example):
 
   return {'label': output, 'text': prompt}
 
-#checkpoint = "roberta-base"
+checkpoint = "roberta-base"
 #checkpoint = "roberta-large"
-checkpoint = "facebook/bart-large"
+#checkpoint = "facebook/bart-large"
 
 tokenizer = AutoTokenizer.from_pretrained(checkpoint)
 model = AutoModelForSequenceClassification.from_pretrained(checkpoint, num_labels=2)
-model.half()
+#model.half()
 
 def tokenize_function(examples):
   return tokenizer(examples["text"], padding="max_length", truncation=True)
@@ -136,7 +136,7 @@ def custom_metrics_all(eval_prediction: EvalPrediction):
     #print('labels: ', labels)
     #print('shape of labels: ', labels.shape)
     
-    #predictions = np.argmax(logits, axis=-1)
+    predictions = np.argmax(logits, axis=-1)
     
     #matrix = torch.tensor(logits)
     #predictions = torch.argmax(matrix, dim=-1)
@@ -157,7 +157,10 @@ def custom_metrics_all_2(eval_pred):
   metric4 = load_metric("accuracy")
 
   logits, labels = eval_pred
+  print('labels: ', labels)
+
   predictions = np.argmax(logits, axis=-1)
+  print('predictions: ', predictions)
 
   # micro or macro or weighted
   precision = metric1.compute(predictions=predictions, references=labels, average="weighted")["precision"]
@@ -387,7 +390,7 @@ for train_size in size_list:
     small_train_dataset = tokenized_datasets["train"].shuffle(seed=42)
     small_train_dataset = small_train_dataset.select(range(1000))
     small_eval_dataset = tokenized_datasets["validation"].shuffle(seed=42)
-    small_eval_dataset = small_eval_dataset.select(range(1000))
+    small_eval_dataset = small_eval_dataset.select(range(10))
     
     print('small train size: ', len(small_train_dataset))
     print(type(small_train_dataset))
@@ -416,7 +419,7 @@ for train_size in size_list:
         train_dataset=small_train_dataset,
         #eval_dataset=tokenized_datasets["validation"],
         eval_dataset=small_eval_dataset,
-        compute_metrics=custom_metrics_all,
+        compute_metrics=custom_metrics_all_2,
         callbacks=[early_stop])
 
       trainer.train()
