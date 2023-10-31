@@ -119,7 +119,35 @@ def compute_metrics(eval_pred):
   predictions = np.argmax(logits, axis=-1)
   return metric.compute(predictions=predictions, references=labels)
 
+from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
+
 def custom_metrics_all(eval_pred):
+    logits, labels = eval_pred
+    predictions = np.argmax(logits, axis=-1)
+
+    precision = precision_score(labels, predictions, average='weighted')
+    recall = recall_score(labels, predictions, average='weighted')
+    f1 = f1_score(labels, predictions, average='weighted')
+    accuracy = accuracy_score(labels, predictions)
+
+    return {"precision": precision, "recall": recall, "f1": f1, "accuracy": accuracy}
+
+
+def custom_metrics_all_3(precision_metric, recall_metric, f1_metric, accuracy_metric, eval_pred):
+    logits, labels = eval_pred
+    predictions = np.argmax(logits, axis=-1)
+
+    # Compute precision, recall, and F1 with "weighted" averaging
+    precision = precision_metric.compute(predictions=predictions, references=labels, average="weighted")["precision"]
+    recall = recall_metric.compute(predictions=predictions, references=labels, average="weighted")["recall"]
+    f1 = f1_metric.compute(predictions=predictions, references=labels, average="weighted")["f1"]
+
+    # Compute accuracy with "macro" averaging
+    accuracy = accuracy_metric.compute(predictions=predictions, references=labels, average="macro")["accuracy"]
+
+    return {"precision": precision, "recall": recall, "f1": f1, "accuracy": accuracy}
+
+def custom_metrics_all_2(eval_pred):
   metric1 = load_metric("precision")
   metric2 = load_metric("recall")
   metric3 = load_metric("f1")
@@ -354,10 +382,16 @@ for train_size in size_list:
     tokenized_datasets = dataset.map(tokenize_function, batched=True)
 
     small_train_dataset = tokenized_datasets["train"].shuffle(seed=42)
-    small_train_dataset = tokenized_datasets["train"].shuffle(seed=42).select(range(500))
+    small_train_dataset = tokenized_datasets["train"].shuffle(seed=42).select(range(1000))
     small_eval_dataset = tokenized_datasets["validation"].shuffle(seed=42)
     small_eval_dataset = tokenized_datasets["validation"].shuffle(seed=42).select(range(100))
     print('small train size: ', len(small_train_dataset))
+
+    # Define custom metrics
+    precision_metric = load_metric("precision")
+    recall_metric = load_metric("recall")
+    f1_metric = load_metric("f1")
+    accuracy_metric = load_metric("accuracy")
 
     lr = 2e-5
     lr_list = [1e-6, 5e-6, 1e-5, 5e-5, 1e-4]
@@ -375,6 +409,7 @@ for train_size in size_list:
         #eval_dataset=tokenized_datasets["validation"],
         eval_dataset=small_eval_dataset,
         compute_metrics=custom_metrics_all,
+        #compute_metrics=lambda p: custom_metrics_all(precision_metric, recall_metric, f1_metric, accuracy_metric, p),
         callbacks=[early_stop])
 
       trainer.train()
