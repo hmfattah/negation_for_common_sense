@@ -128,6 +128,9 @@ def custom_metrics_all(eval_prediction: EvalPrediction):
     predictions = eval_prediction.predictions
     labels = eval_prediction.label_ids
 
+    print('len of labels: ', len(labels))
+    print('len of predictions: ', len(predictions))
+
     #print('labels: ', labels)
     #print('shape of labels: ', labels.shape)
     
