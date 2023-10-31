@@ -381,6 +381,12 @@ for train_size in size_list:
       trainer.evaluate()
 
       t = tokenized_datasets["test"].remove_columns("text")
+
+      predictions = trainer.predict(dataset['test'])
+      predicted_labels = predictions.predictions.argmax(axis=1)
+      print('predicted_labels: ', predicted_labels)
+      true_labels = dataset['test']["label"]
+
       results = trainer.predict(t)
 
       preds = []
