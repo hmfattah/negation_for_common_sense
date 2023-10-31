@@ -1,6 +1,6 @@
-pip install datasets
-pip install transformers
-pip install scikit-learn
-pip install scipy
-pip install torch
-pip install accelerate==0.20.3
+datasets
+transformers
+scikit-learn
+scipy
+torch
+accelerate==0.20.3
