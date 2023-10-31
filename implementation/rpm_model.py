@@ -129,7 +129,7 @@ def custom_metrics_all(eval_pred):
     print('logits: ', logits)
     print('shape of logits: ', logits.shape)
 
-    predictions = np.argmax(logits, axis=1)
+    predictions = np.argmax(logits, axis=-1)
 
     print('predictions: ', predictions)
 
@@ -390,6 +390,7 @@ for train_size in size_list:
     num_rows = small_eval_dataset.num_rows
     num_columns = len(small_eval_dataset.features)
     print("Shape of dataset['eval']: Rows =", num_rows, ", Columns =", num_columns)
+    print(small_eval_dataset[0])
 
     lr = 2e-5
     #lr_list = [1e-6, 5e-6, 1e-5, 5e-5, 1e-4]
