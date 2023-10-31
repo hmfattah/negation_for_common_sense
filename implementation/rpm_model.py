@@ -408,11 +408,14 @@ for train_size in size_list:
         train_dataset=small_train_dataset,
         #eval_dataset=tokenized_datasets["validation"],
         eval_dataset=small_eval_dataset,
-        compute_metrics=custom_metrics_all,
+        compute_metrics=compute_metrics,
         #compute_metrics=lambda p: custom_metrics_all(precision_metric, recall_metric, f1_metric, accuracy_metric, p),
         callbacks=[early_stop])
 
       trainer.train()
+
+      print('hi')
+
       trainer.evaluate()
 
       t = tokenized_datasets["test"].remove_columns("text")
