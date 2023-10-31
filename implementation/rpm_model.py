@@ -24,6 +24,7 @@ import random
 import os 
 from sklearn.dummy import DummyClassifier
 from transformers import AutoTokenizer
+from evaluate import load
 
 import torch
 #torch.cuda.empty_cache()
@@ -121,10 +122,10 @@ def compute_metrics(eval_pred):
 
 #from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
 def custom_metrics_all(eval_pred):
-  metric1 = load_metric("precision")
-  metric2 = load_metric("recall")
-  metric3 = load_metric("f1")
-  metric4 = load_metric("accuracy")
+  metric1 = load("precision")
+  metric2 = load("recall")
+  metric3 = load("f1")
+  metric4 = load("accuracy")
 
   logits, labels = eval_pred
   predictions = np.argmax(logits, axis=-1)
