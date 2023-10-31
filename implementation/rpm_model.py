@@ -110,7 +110,6 @@ model = AutoModelForSequenceClassification.from_pretrained(checkpoint, num_label
 
 def tokenize_function(examples):
   return tokenizer(examples["text"], padding="max_length", truncation=True)
-  #return tokenizer(examples["text"], padding="max_length", truncation=True)
 
 def compute_metrics(eval_pred):
   metric = load_metric("accuracy")
@@ -334,11 +333,10 @@ for train_size in size_list:
     filtered_dataset = td.filter(lambda example: example['q'] != 'nan')
     filtered_dataset = filtered_dataset.filter(lambda example: example['q'] is not None)
     
-    #train_dataset = Dataset.from_pandas(filtered_dataset.to_pandas())
     train_dataset = filtered_dataset.map(concat_all_by_sep_train)
     new_train_dataset = train_dataset.remove_columns(['p', 'q', 'r', 'output'])
     new_train_dataset = new_train_dataset.shuffle(seed=42)
-    dts = Dataset.from_pandas(new_train_dataset.to_pandas()).train_test_split(test_size=0.10)
+    dts = new_train_dataset.train_test_split(test_size=0.10)
 
     test_dataset_all = Dataset.from_pandas(test_data_all)
     test_dataset_all = test_dataset_all.map(concat_all_by_sep_train)
@@ -349,11 +347,8 @@ for train_size in size_list:
     #new_test_dataset = test_dataset_all.remove_columns(['p', 'q', 'r', 'output'])
 
     dataset = DatasetDict()
-    #dataset['train'] = dts["train"]
     dataset['train'] = Dataset.from_pandas(dts["train"].to_pandas())
-    #dataset['validation'] = dts["test"]
     dataset['validation'] = Dataset.from_pandas(dts["test"].to_pandas())
-    #dataset['test'] =  test_dataset_all
     dataset['test'] =  Dataset.from_pandas(new_test_dataset.to_pandas())
 
     print(dataset)
@@ -366,16 +361,6 @@ for train_size in size_list:
     small_eval_dataset = small_eval_dataset.select(range(10))
     
     print('small train size: ', len(small_train_dataset))
-    print(type(small_train_dataset))
-    print(type(small_eval_dataset))
-
-    num_rows = small_train_dataset.num_rows
-    num_columns = len(small_train_dataset.features)
-    print("Shape of dataset['train']: Rows =", num_rows, ", Columns =", num_columns)
-
-    num_rows = small_eval_dataset.num_rows
-    num_columns = len(small_eval_dataset.features)
-    print("Shape of dataset['eval']: Rows =", num_rows, ", Columns =", num_columns)
 
     lr = 2e-5
     #lr_list = [1e-6, 5e-6, 1e-5, 5e-5, 1e-4]
@@ -396,9 +381,6 @@ for train_size in size_list:
         callbacks=[early_stop])
 
       trainer.train()
-
-      print('hi ')
-
       trainer.evaluate()
 
       t = tokenized_datasets["test"].remove_columns("text")
