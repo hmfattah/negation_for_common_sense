@@ -122,7 +122,7 @@ def compute_metrics(eval_pred):
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
 from transformers import EvalPrediction
 
-def custom_metrics_all(eval_prediction: EvalPrediction, data_loader):
+def custom_metrics_all(eval_prediction: EvalPrediction):
     #logits, labels = eval_pred
 
     predictions = eval_prediction.predictions
