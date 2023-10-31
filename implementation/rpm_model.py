@@ -130,7 +130,8 @@ def custom_metrics_all(eval_pred):
     #print('shape of logits: ', logits.shape)
 
     #predictions = np.argmax(logits, axis=-1)
-    predictions = torch.argmax(logits, dim=-1)
+    matrix = torch.tensor(logits)
+    predictions = torch.argmax(matrix, dim=-1)
 
     print('predictions: ', predictions)
 
