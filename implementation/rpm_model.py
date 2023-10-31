@@ -100,13 +100,13 @@ def concat_all_by_sep_train_2(example):
 
   return {'label': output, 'text': prompt}
 
-checkpoint = "roberta-base"
+#checkpoint = "roberta-base"
 #checkpoint = "roberta-large"
-#checkpoint = "facebook/bart-large"
+checkpoint = "facebook/bart-large"
 
 tokenizer = AutoTokenizer.from_pretrained(checkpoint)
 model = AutoModelForSequenceClassification.from_pretrained(checkpoint, num_labels=2)
-#model.half()
+model.half()
 
 def tokenize_function(examples):
   return tokenizer(examples["text"], padding="max_length", truncation=True)
@@ -398,7 +398,7 @@ for train_size in size_list:
       trainer.train()
 
       print('hi ')
-      
+
       trainer.evaluate()
 
       t = tokenized_datasets["test"].remove_columns("text")
