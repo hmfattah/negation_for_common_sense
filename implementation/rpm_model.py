@@ -122,11 +122,15 @@ def compute_metrics(eval_pred):
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
 
 def custom_metrics_all(eval_pred):
+    print('eval pred: ', eval_pred)
+    print('type: ', type(eval_pred))
+    print('shape: ', eval_pred.shape)
+
     logits, labels = eval_pred
 
     print('labels: ', labels)
     print('shape of labels: ', labels.shape)
-    print('logits: ', logits)
+    #print('logits: ', logits)
     #print('shape of logits: ', logits.shape)
 
     #predictions = np.argmax(logits, axis=-1)
