@@ -119,53 +119,20 @@ def compute_metrics(eval_pred):
   predictions = np.argmax(logits, axis=-1)
   return metric.compute(predictions=predictions, references=labels)
 
-from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
-from transformers import EvalPrediction
-
-def custom_metrics_all(eval_prediction: EvalPrediction):
-    #logits, labels = eval_pred
-
-    predictions = eval_prediction.predictions
-    labels = eval_prediction.label_ids
-
-    print('len of labels: ', len(labels))
-    print('labels: ', labels)
-    print('len of predictions: ', len(predictions))
-    print('predictions: ', predictions)
-
-    #print('labels: ', labels)
-    #print('shape of labels: ', labels.shape)
-    
-    predictions = np.argmax(logits, axis=-1)
-    
-    #matrix = torch.tensor(logits)
-    #predictions = torch.argmax(matrix, dim=-1)
-
-    #print('predictions: ', predictions)
-
-    precision = precision_score(labels, predictions, average='weighted')
-    recall = recall_score(labels, predictions, average='weighted')
-    f1 = f1_score(labels, predictions, average='weighted')
-    accuracy = accuracy_score(labels, predictions)
-
-    return {"precision": precision, "recall": recall, "f1": f1, "accuracy": accuracy}
-
-def custom_metrics_all_2(eval_pred):
+#from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
+def custom_metrics_all(eval_pred):
   metric1 = load_metric("precision")
   metric2 = load_metric("recall")
   metric3 = load_metric("f1")
   metric4 = load_metric("accuracy")
 
   logits, labels = eval_pred
-  print('labels: ', labels)
-
   predictions = np.argmax(logits, axis=-1)
-  print('predictions: ', predictions)
 
-  # micro or macro or weighted
-  precision = metric1.compute(predictions=predictions, references=labels, average="weighted")["precision"]
-  recall = metric2.compute(predictions=predictions, references=labels, average="weighted")["recall"]
-  f1 = metric3.compute(predictions=predictions, references=labels, average="weighted")["f1"]
+  #micro and macro
+  precision = metric1.compute(predictions=predictions, references=labels, average="macro")["precision"]
+  recall = metric2.compute(predictions=predictions, references=labels, average="macro")["recall"]
+  f1 = metric3.compute(predictions=predictions, references=labels, average="micro")["f1"]
   accuracy = metric4.compute(predictions=predictions, references=labels)["accuracy"]
 
   return {"precision": precision, "recall": recall, "f1": f1, "accuracy": accuracy}
@@ -366,22 +333,28 @@ for train_size in size_list:
     # Filter out rows where 'q' column has value 'nan' | 'None'
     filtered_dataset = td.filter(lambda example: example['q'] != 'nan')
     filtered_dataset = filtered_dataset.filter(lambda example: example['q'] is not None)
-
-    train_dataset = filtered_dataset.map(concat_all_by_sep_train)
-    train_dataset = train_dataset.remove_columns(['p', 'q', 'r', 'output']).shuffle(seed=42)
-    dts = train_dataset.train_test_split(test_size=0.10)
+    
+    train_dataset = Dataset.from_pandas(filtered_dataset.to_pandas())
+    train_dataset = train_dataset.map(concat_all_by_sep_train)
+    new_train_dataset = train_dataset.remove_columns(['p', 'q', 'r', 'output'])
+    new_train_dataset = new_train_dataset.shuffle(seed=42)
+    dts = Dataset.from_pandas(new_train_dataset.to_pandas()).train_test_split(test_size=0.10)
 
     test_dataset_all = Dataset.from_pandas(test_data_all)
     test_dataset_all = test_dataset_all.map(concat_all_by_sep_train)
 
+    new_test_dataset = test_dataset_all
     if '__index_level_0__' in test_dataset_all.column_names:
-      test_dataset_all = test_dataset_all.remove_columns(['__index_level_0__'])
-    test_dataset_all = test_dataset_all.remove_columns(['p', 'q', 'r', 'output'])
+      new_test_dataset = test_dataset_all.remove_columns(['__index_level_0__'])
+    #new_test_dataset = test_dataset_all.remove_columns(['p', 'q', 'r', 'output'])
 
     dataset = DatasetDict()
-    dataset['train'] = dts["train"]
-    dataset['validation'] = dts["test"]
-    dataset['test'] =  test_dataset_all
+    #dataset['train'] = dts["train"]
+    dataset['train'] = Dataset.from_pandas(dts["train"].to_pandas())
+    #dataset['validation'] = dts["test"]
+    dataset['validation'] = Dataset.from_pandas(dts["test"].to_pandas())
+    #dataset['test'] =  test_dataset_all
+    dataset['test'] =  Dataset.from_pandas(new_test_dataset.to_pandas())
 
     print(dataset)
 
@@ -419,10 +392,13 @@ for train_size in size_list:
         train_dataset=small_train_dataset,
         #eval_dataset=tokenized_datasets["validation"],
         eval_dataset=small_eval_dataset,
-        compute_metrics=custom_metrics_all_2,
+        compute_metrics=custom_metrics_all,
         callbacks=[early_stop])
 
       trainer.train()
+
+      print('hi ')
+      
       trainer.evaluate()
 
       t = tokenized_datasets["test"].remove_columns("text")
