@@ -102,11 +102,11 @@ def concat_all_by_sep_train_2(example):
 
 #checkpoint = "roberta-base"
 checkpoint = "roberta-large"
-#checkpoint = "facebook/bart-large"
+checkpoint = "facebook/bart-large"
 
 tokenizer = AutoTokenizer.from_pretrained(checkpoint)
 model = AutoModelForSequenceClassification.from_pretrained(checkpoint, num_labels=2)
-#model.half()
+model.half()
 
 def tokenize_function(examples):
   return tokenizer(examples["text"], padding="max_length", truncation=True)
@@ -195,6 +195,8 @@ def getTrainingArguments(size, lr_2):
     warmup_steps=step,                # number of warmup steps for learning rate scheduler
     logging_steps=step,               # log & save weights each logging_steps
     save_steps=step,
+
+    fp16=True,
 
     learning_rate=lr_2,
     seed=42,
@@ -359,6 +361,11 @@ for train_size in size_list:
     small_train_dataset = small_train_dataset.select(range(1000))
     small_eval_dataset = tokenized_datasets["validation"].shuffle(seed=42)
     small_eval_dataset = small_eval_dataset.select(range(10))
+
+    small_train_dataset.set_format(type="torch", columns=["input_ids", "attention_mask", "labels"])
+    small_train_dataset = small_train_dataset.cast(torch.float16)
+    small_eval_dataset.set_format(type="torch", columns=["input_ids", "attention_mask", "labels"])
+    small_eval_dataset = small_eval_dataset.cast(torch.float16)
     
     print('small train size: ', len(small_train_dataset))
 
