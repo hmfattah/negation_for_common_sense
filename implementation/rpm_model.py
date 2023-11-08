@@ -28,7 +28,7 @@ from transformers import AutoTokenizer
 import torch
 torch.cuda.empty_cache()
 
-root="../data"
+root='../data'
 link2 = root+'/2_test_data.csv'
 link_test_all = root+'/2_test_data_1488.csv'
 link3 = root+'/1_annotated_data.csv'
@@ -108,7 +108,7 @@ checkpoint = "roberta-large"
 
 tokenizer = AutoTokenizer.from_pretrained(checkpoint)
 model = AutoModelForSequenceClassification.from_pretrained(checkpoint, num_labels=2)
-model.half()
+#model.half()
 
 def tokenize_function(examples):
   return tokenizer(examples["text"], padding="max_length", truncation=True)
@@ -198,7 +198,7 @@ def getTrainingArguments(size, lr_2):
     logging_steps=step,               # log & save weights each logging_steps
     save_steps=step,
 
-    fp16=True,
+    #fp16=True,
 
     learning_rate=lr_2,
     seed=42,
