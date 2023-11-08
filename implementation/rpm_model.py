@@ -68,6 +68,8 @@ def concat_all_by_sep_train(example):
   output = int(example['output'])
 
   final_str = example['p'] + " </s> " + example['r'] + " </s> " + example['q']
+  #for dbarta
+  #final_str = '[CLS]' + example['p'] + " [SEP] " + example['r'] + " [SEP] " + example['q'] + ' [CLS]'
 
   return {'label': output, 'text': final_str}
 
@@ -102,7 +104,7 @@ def concat_all_by_sep_train_2(example):
 
 #checkpoint = "roberta-base"
 checkpoint = "roberta-large"
-checkpoint = "facebook/bart-large"
+#checkpoint = "facebook/bart-large"
 
 tokenizer = AutoTokenizer.from_pretrained(checkpoint)
 model = AutoModelForSequenceClassification.from_pretrained(checkpoint, num_labels=2)
@@ -289,6 +291,7 @@ for train_size in size_list:
       with open('output.txt', 'a') as file:
         print("Dataset: ANION_Logical_Neg(-) + ANION_Semi_Logical_Neg(-), Size: ", train_size, file = file)
     elif i == 8:
+      continue
       # process ATOMIC(+) + ATOMIC(-)
       train_data = pd.concat([atomic_data, atomic_data_minus], axis=0) #axis = 0 means row wise concatanation
 
@@ -317,7 +320,6 @@ for train_size in size_list:
       with open('output.txt', 'a') as file:
         print("Dataset: ANION_Logical_Neg(+) + ANION_Logical_Neg(-) + ANION_Semi_Logical_Neg(+) + ANION_Semi_Logical_Neg(-), Size: ", train_size, file = file)
     elif i == 12:
-      continue
       # process ATOMIC (+) + ATOMIC (-) + ANION_Logical_Neg(+) + ANION_Logical_Neg(-) + ANION_Semi_Logical_Neg(+) + ANION_Semi_Logical_Neg(-)
       train_data = pd.concat([atomic_data, atomic_data_minus, anion_logical_neg_data_label_1, anion_logical_neg_data_minus,
                             anion_semi_logical_neg_data_label_1, anion_semi_logical_neg_data_minus], axis=0)
@@ -372,7 +374,7 @@ for train_size in size_list:
 
     lr = 2e-5
     #lr_list = [1e-6, 5e-6, 1e-5, 5e-5, 1e-4]
-    lr_list = [1e-6, 5e-5]
+    lr_list = [1e-6, 5e-6, 1e-5, 5e-5]
     for each_lr in lr_list:
       tr_args = getTrainingArguments(len(small_train_dataset), each_lr)
 
